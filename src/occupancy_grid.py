@@ -5,6 +5,7 @@ class OccupancyGrid:
     resolution = 0
     size = (0, 0)
     origin = (0, 0)
+    grid = None
 
     def __init__(self, origin, size, resolution):
         """
@@ -18,12 +19,14 @@ class OccupancyGrid:
         @type size: Tuple[int, int]
         @type resolution: float
         """
-        origin = self.origin
-        size = self.size
-        resolution = self.resolution
+        self.origin = origin
+        self.size = size
+        self.resolution = resolution
 
-
-
+        grid_vec_length = (self.size[0]+1) * (self.size[1]+1)
+        self.grid = [-1] * grid_vec_length
+  #      print("grid_vec_length = {}\n").format(grid_vec_length)      
+                
     def to_grid(self, world_x, world_y):
         """
         Converts world coordinates to grid coordinates, or None if world coordinates are out of bound
@@ -34,13 +37,14 @@ class OccupancyGrid:
         """
         if world_x > self.size[0] or world_y > self.size[1] or world_x < 0 or world_y < 0:
             return None
-        inverse_resolution = 1 / self.resolution
-        grid_x = (world_x - self.origin[0]) * inverse_resolution
-        grid_y = (world_y - self.origin[1]) * inverse_resolution
+        inverse_resolution = 1 / float(self.resolution)
+        grid_x = int((world_x - self.origin[0]) * inverse_resolution)
+        grid_y = int((world_y - self.origin[1]) * inverse_resolution)
+
+     #   print("origin = {},{}, resolution = {}, world = {},{}, grid = {},{}\n").format(self.origin[0],self.origin[1],self.resolution,world_x,world_y,grid_x,grid_y)
 
         return grid_x, grid_y
 
-        
     def to_world(self, grid_x, grid_y):
         """
         Converts grid coordinates to world coordinates, or None if converted coordinates are out of bounds
@@ -63,3 +67,12 @@ class OccupancyGrid:
         @type world_x: float
         @type world_y: float
         """
+
+        grid_x, grid_y = self.to_grid(world_x, world_y)
+
+        if (grid_x is None) or (grid_y is None):
+            return
+
+        grid_vec_index = grid_y * self.size[0] + grid_x
+
+        self.grid[grid_vec_index] = 100
