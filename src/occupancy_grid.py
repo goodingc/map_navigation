@@ -34,11 +34,13 @@ class OccupancyGrid:
         """
         if world_x > self.size[0] or world_y > self.size[1] or world_x < 0 or world_y < 0:
             return None
+        inverse_resolution = 1 / self.resolution
+        grid_x = (world_x - self.origin[0]) * inverse_resolution
+        grid_y = (world_y - self.origin[1]) * inverse_resolution
+
+        return grid_x, grid_y
 
         
-        
-
-
     def to_world(self, grid_x, grid_y):
         """
         Converts grid coordinates to world coordinates, or None if converted coordinates are out of bounds
