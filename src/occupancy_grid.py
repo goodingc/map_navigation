@@ -13,6 +13,7 @@ class OccupancyGrid:
             size as self.size,
             resolution as self.resolution,
             flat grid of -1 in the occupancy grid as self.grid
+        @author Oliver
         @type origin: Tuple[float, float]
         @type size: Tuple[int, int]
         @type resolution: float
@@ -26,12 +27,16 @@ class OccupancyGrid:
     def to_grid(self, world_x, world_y):
         """
         Converts world coordinates to grid coordinates, or None if world coordinates are out of bound
+        @author Oliver
         @type world_x: float
         @type world_y: float
         @rtype: Optional[Tuple[int, int]]
         """
         if world_x > self.size[0] or world_y > self.size[1] or world_x < 0 or world_y < 0:
             return None
+
+        
+        
 
 
     def to_world(self, grid_x, grid_y):
@@ -52,6 +57,7 @@ class OccupancyGrid:
     def mark_visited(self, world_x, world_y):
         """
         Marks the appropriate grid cell as 100 as dictated by the provided world coordinates
+        @author Oliver
         @type world_x: float
         @type world_y: float
         """
