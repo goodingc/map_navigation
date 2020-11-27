@@ -29,9 +29,15 @@ def launch_nav_stack():
 
 def get_header():
     """
+    @author Mohamed
     @return: Header where frame_id='map' and stamp correctly filled
     @rtype: Header
     """
+    header = Header()
+    header.frame_id = "map"
+    header.stamp = rospy.Time.now()
+
+    return header
 
 
 class Position:
@@ -56,6 +62,21 @@ class Position:
         @return: pose message
         @rtype: Pose
         """
+        orientation = tf.transformations.quaternion_from_euler(
+            0, 0, self.theta)
+        return Pose(
+            position=Point(
+                x=self.x,
+                y=self.y,
+                z=0
+            ),
+            orientation=Quaternion(
+                x=orientation[0],
+                y=orientation[1],
+                z=orientation[2],
+                w=orientation[3]
+            ),
+        )
 
     def __str__(self):
         """
@@ -142,7 +163,8 @@ class MapNavigation:
         print 'Set pose to {} after {} tries'.format(position, tries)
 
     def send_goal(self, position, await=True, timeout=rospy.Duration(60)):
-        """
+         """
+        @author Mohamed
         Sends goal to position stack and optionally awaits it's completion
         @param position: goal position
         @type position: Position
@@ -153,21 +175,41 @@ class MapNavigation:
         @return: True if goal is reached, False otherwise
         @rtype: bool
         """
+        self.action_client.send_goal(MoveBaseGoal(
+            target_pose=PoseStamped(header=get_header(), pose=position.to_pose())))
+        self.action_client.wait_for_result(timeout)
+        state = self.action_client.get_state()
+        return state == actionlib.GoalStatus.SUCCEEDED or state == actionlib.GoalStatus.ACTIVE
 
     def move_along_path(self, checkpoints, marking=True):
         """
+        @author Mohamed
         Moves robot along checkpoints and optionally marks the occupancy grid. Ends early if a checkpoint fails
         @type checkpoints:  List[Position]
         @param marking: True if the occupancy grid should be marked, False otherwise
         @type marking: bool
         """
+        self.marking = marking
+        for i in checkpoints:
+            if not self.send_goal(i):
+                print ('Checkpoint Failed')
+                break
+        self.marking = False
+
 
     def handle_amcl_pose(self, msg):
-        """
+       """
+        @author Mohamed
         Parses mgs and sets self.amcl_pose with the current estimated pose.
         Optionally marks the occupancy grid if self.marking is True
         @type msg: PoseWithCovarianceStamped
         """
+        (_, _, theta) = tf.transformations.euler_from_quaternion(
+            [msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z])
+        self.amcl_pos = Position(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, theta)
+        if self.marking:
+            self.occupancy_grid.mark_visited(
+                msg.pose.pose.position.x, msg.pose.pose.position.y)
 
 
 if __name__ == '__main__':
