@@ -232,7 +232,7 @@ if __name__ == '__main__':
     # Reset simulation
     rospy.ServiceProxy('gazebo/reset_simulation', Empty)()
     launch_nav_stack()
-    nav = MapNavigation(OccupancyGrid((10, 10), (20, 20), 0.05))
+    nav = MapNavigation(OccupancyGrid((-13, -9), (20, 20), 0.05))
     print 'init'
     nav.set_initial_position(Position(-3, 1))
     print 'set pos'
