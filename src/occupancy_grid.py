@@ -35,7 +35,7 @@ class OccupancyGrid:
         @type world_y: float
         @rtype: Optional[Tuple[int, int]]
         """
-        if world_x > self.size[0] or world_y > self.size[1] or world_x < 0 or world_y < 0:
+        if world_x > self.size[0] or world_y > self.size[1] or world_x < self.origin[0] or world_y < self.origin[1]:
             return None
         inverse_resolution = 1 / float(self.resolution)
         grid_x = int((world_x - self.origin[0]) * inverse_resolution)
