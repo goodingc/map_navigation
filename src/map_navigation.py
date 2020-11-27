@@ -171,7 +171,6 @@ class MapNavigation:
                      self.amcl_pos.y - 0.5 < position.y < self.amcl_pos.y + 0.5 and
                      self.amcl_pos.theta - 0.5 < position.theta < self.amcl_pos.theta + 0.5):
             tries += 1
-            print 'trying' + str(self.amcl_pos)
             self.initialpose_pub.publish(pose)
             self.rate_limiter.sleep()
 
@@ -233,9 +232,7 @@ if __name__ == '__main__':
     rospy.ServiceProxy('gazebo/reset_simulation', Empty)()
     launch_nav_stack()
     nav = MapNavigation(OccupancyGrid((-13, -9), (20, 20), 0.05))
-    print 'init'
     nav.set_initial_position(Position(-3, 1))
-    print 'set pos'
     nav.move_along_path([
         Position(-1, 2),
         Position(5, 1),
