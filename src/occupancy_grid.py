@@ -58,7 +58,7 @@ class OccupancyGrid:
         world_y = grid_y * self.resolution + self.origin[1] + half_cell_size
         if world_x > self.size[0] or world_y > self.size[1] or world_x < 0 or world_y < 0:
             return None
-        return world_x, world_y
+        return int(world_x), int(world_y)
 
     def mark_visited(self, world_x, world_y):
         """
