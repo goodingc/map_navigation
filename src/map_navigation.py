@@ -124,13 +124,27 @@ class MapNavigation:
 
     def synchronize(self):
         """
+        @author Callum
         Blocks until rospy.Time.now() returns a valid value
         """
+        sys.stdout.write('Synchronizing')
+        while rospy.Time.now().to_sec() == 0:
+            sys.stdout.write('.')
+            sys.stdout.flush()
+            self.rate_limiter.sleep()
+        sys.stdout.write('\n')
 
     def await_action_server(self):
         """
+        @author Callum
         Blocks until action action server is ready
         """
+        sys.stdout.write('Awaiting action server')
+        while not self.action_client.wait_for_server():
+            sys.stdout.write('.')
+            sys.stdout.flush()
+            self.rate_limiter.sleep()
+        sys.stdout.write('\n')
 
     def set_initial_position(self, position):
         """
@@ -157,13 +171,14 @@ class MapNavigation:
                      self.amcl_pos.y - 0.5 < position.y < self.amcl_pos.y + 0.5 and
                      self.amcl_pos.theta - 0.5 < position.theta < self.amcl_pos.theta + 0.5):
             tries += 1
+            print 'trying' + str(self.amcl_pos)
             self.initialpose_pub.publish(pose)
             self.rate_limiter.sleep()
 
         print 'Set pose to {} after {} tries'.format(position, tries)
 
     def send_goal(self, position, await=True, timeout=rospy.Duration(60)):
-         """
+        """
         @author Mohamed
         Sends goal to position stack and optionally awaits it's completion
         @param position: goal position
@@ -179,6 +194,7 @@ class MapNavigation:
             target_pose=PoseStamped(header=get_header(), pose=position.to_pose())))
         self.action_client.wait_for_result(timeout)
         state = self.action_client.get_state()
+        print state
         return state == actionlib.GoalStatus.SUCCEEDED or state == actionlib.GoalStatus.ACTIVE
 
     def move_along_path(self, checkpoints, marking=True):
@@ -192,24 +208,24 @@ class MapNavigation:
         self.marking = marking
         for i in checkpoints:
             if not self.send_goal(i):
-                print ('Checkpoint Failed')
+                print 'Checkpoint Failed'
                 break
         self.marking = False
 
-
     def handle_amcl_pose(self, msg):
-       """
-        @author Mohamed
-        Parses mgs and sets self.amcl_pose with the current estimated pose.
-        Optionally marks the occupancy grid if self.marking is True
-        @type msg: PoseWithCovarianceStamped
         """
+         @author Mohamed
+         Parses mgs and sets self.amcl_pose with the current estimated pose.
+         Optionally marks the occupancy grid if self.marking is True
+         @type msg: PoseWithCovarianceStamped
+         """
         (_, _, theta) = tf.transformations.euler_from_quaternion(
-            [msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z])
-        self.amcl_pos = Position(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, theta)
+            [msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z,
+             msg.pose.pose.orientation.w])
+        self.amcl_pos = Position(msg.pose.pose.position.x, msg.pose.pose.position.y, theta)
         if self.marking:
             self.occupancy_grid.mark_visited(
-                msg.pose.pose.position.x, msg.pose.pose.position.y)
+                self.amcl_pos.x, self.amcl_pos.y)
 
 
 if __name__ == '__main__':
@@ -217,7 +233,9 @@ if __name__ == '__main__':
     rospy.ServiceProxy('gazebo/reset_simulation', Empty)()
     launch_nav_stack()
     nav = MapNavigation(OccupancyGrid((10, 10), (20, 20), 0.05))
+    print 'init'
     nav.set_initial_position(Position(-3, 1))
+    print 'set pos'
     nav.move_along_path([
         Position(-1, 2),
         Position(5, 1),
