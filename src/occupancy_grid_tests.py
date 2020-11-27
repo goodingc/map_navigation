@@ -71,7 +71,52 @@ class TestToGrid(unittest.TestCase):
             ((20.1, 4), None),
             ((20, 4), (20, 4))
         ])
+        
+class TestToWorld(unittest.TestCase):
+   
+    def to_world(self, occupancy_grid, test_cases):
+        for test_case in test_cases:
+            self.assertEqual(occupancy_grid.to_world(test_case[0][0], test_case[0][1]), test_case[1],
+                             "to_world{} should be {}!".format(test_case[0], test_case[1]))
 
+    def test_bounds(self):
+        """
+        @author Mohamed
+        """
+        self.to_world(OccupancyGrid((0, 0), (20, 20), 1), [
+            ((5, 7), (5, 7)),
+            ((3, 10), (3, 10)),
+            ((-6, -1), None),
+            ((50, 4), None)
+        ])
+
+    def test_resolution(self):
+        """
+        @author Mohamed
+        """
+        self.to_world(OccupancyGrid((0, 0), (20, 20), 0.5), [
+            ((10, 10), (5, 5)),
+            ((0, 0), (0, 0)),
+            ((-6, -1), None),
+            ((50, 4), None)
+        ])
+        self.to_world(OccupancyGrid((0, 0), (20, 20), 2), [
+            ((2, 2), (5, 5)),
+            ((0, 0), (1, 1)),
+            ((-6, -1), None),
+            ((50, 4), None)
+        ])
+
+    def test_origin(self):
+        """
+        @author Mohamed
+        """
+        self.to_world(OccupancyGrid((-5, -5), (20, 20), 1), [
+            ((9, 9), (4, 4)),
+            ((5, 5), (0, 0)),
+            ((-6, -1), None),
+            ((50, 4), None)
+        ])
 
 if __name__ == '__main__':
     unittest.main()
