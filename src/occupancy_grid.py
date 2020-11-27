@@ -34,7 +34,6 @@ class OccupancyGrid:
         @type world_y: float
         @rtype: Optional[Tuple[int, int]]
         """
-        print world_x, world_y, self.size, self.origin
         if world_x < self.origin[0] or world_y < self.origin[1] or world_x > self.origin[
             0] + self.size[0] or world_y > self.origin[1] + self.size[1]:
             return None
@@ -71,7 +70,5 @@ class OccupancyGrid:
 
         if (grid_x is None) or (grid_y is None):
             return
-        print grid_x, grid_y, len(self.grid), grid_y * self.size[0] + grid_x, grid_y * int(
-            self.size[0] / self.resolution) + grid_x
 
         self.grid[grid_y * self.size[0] + grid_x] = 100
