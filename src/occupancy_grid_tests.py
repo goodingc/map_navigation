@@ -71,9 +71,10 @@ class TestToGrid(unittest.TestCase):
             ((20.1, 4), None),
             ((20, 4), (20, 4))
         ])
-        
+
+
 class TestToWorld(unittest.TestCase):
-   
+
     def to_world(self, occupancy_grid, test_cases):
         for test_case in test_cases:
             self.assertEqual(occupancy_grid.to_world(test_case[0][0], test_case[0][1]), test_case[1],
@@ -117,6 +118,7 @@ class TestToWorld(unittest.TestCase):
             ((-6, -1), None),
             ((50, 4), None)
         ])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,6 +2,8 @@
 import sys
 
 import actionlib
+import cv2
+import numpy as np
 import roslaunch.parent
 import roslaunch.rlutil
 import rospy
@@ -193,7 +195,6 @@ class MapNavigation:
             target_pose=PoseStamped(header=get_header(), pose=position.to_pose())))
         self.action_client.wait_for_result(timeout)
         state = self.action_client.get_state()
-        print state
         return state == actionlib.GoalStatus.SUCCEEDED or state == actionlib.GoalStatus.ACTIVE
 
     def move_along_path(self, checkpoints, marking=True):
@@ -225,6 +226,9 @@ class MapNavigation:
         if self.marking:
             self.occupancy_grid.mark_visited(
                 self.amcl_pos.x, self.amcl_pos.y)
+            _, grid = cv2.threshold((self.occupancy_grid.get_grid() + 1).astype(np.uint8), 50, 255, cv2.THRESH_BINARY)
+            cv2.imshow('Occupancy Grid', cv2.cvtColor(grid, cv2.COLOR_GRAY2RGB))
+            cv2.waitKey(1)
 
 
 if __name__ == '__main__':

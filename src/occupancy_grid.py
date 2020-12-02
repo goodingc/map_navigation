@@ -1,4 +1,5 @@
 from typing import Tuple, Optional
+import numpy as np
 
 
 class OccupancyGrid:
@@ -22,7 +23,7 @@ class OccupancyGrid:
         self.origin = origin
         self.size = size
         self.resolution = resolution
-        self.grid = [-1] * int((size[0] * size[1] / pow(resolution, 2)))
+        self.grid = [-1] * (int(size[0] / resolution) * int(size[1] / resolution))
 
     #      print("grid_vec_length = {}\n").format(grid_vec_length)
 
@@ -70,5 +71,8 @@ class OccupancyGrid:
 
         if (grid_x is None) or (grid_y is None):
             return
+        print grid_x, grid_y
+        self.grid[grid_y * int(self.size[0] / self.resolution) + grid_x] = 100
 
-        self.grid[grid_y * self.size[0] + grid_x] = 100
+    def get_grid(self):
+        return np.reshape(self.grid, (int(self.size[0] / self.resolution), int(self.size[1] / self.resolution)))
